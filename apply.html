@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speaker Realm — Application Design Review</title>
+  <style>
+    :root {
+      --ivory: #efebe3;
+      --ivory-2: #f6f2eb;
+      --ink: #0c0b10;
+      --charcoal: #2a2830;
+      --purple: #6d35d6;
+      --purple-dark: #4f24aa;
+      --gold: #f1b62d;
+      --gold-soft: #ddb85a;
+      --line: rgba(12,11,16,.12);
+      --line-strong: rgba(12,11,16,.2);
+      --white: #ffffff;
+      --shadow: 0 24px 60px rgba(9,9,14,.12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--ivory);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page { min-height: 100vh; }
+
+    .hero {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(109,53,214,.28), transparent 38%),
+        radial-gradient(circle at 82% 100%, rgba(241,182,45,.22), transparent 32%),
+        linear-gradient(180deg, #16131d 0%, #0c0b10 100%);
+      color: var(--white);
+      padding: 28px 24px 150px;
+    }
+
+    .hero-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .brand {
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .26em;
+      text-transform: uppercase;
+      margin-bottom: 34px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 40px;
+      align-items: end;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(52px, 7vw, 96px);
+      line-height: .94;
+      font-weight: 900;
+      letter-spacing: -.05em;
+      text-transform: uppercase;
+      max-width: 760px;
+    }
+
+    h1 .gold { color: var(--gold); }
+    h1 .white { color: var(--ivory-2); }
+
+    .hero-copy {
+      margin-top: 24px;
+      max-width: 700px;
+      color: rgba(255,255,255,.86);
+      font-size: clamp(18px, 2vw, 24px);
+      line-height: 1.4;
+    }
+
+    .hero-side {
+      justify-self: end;
+      align-self: center;
+      width: 100%;
+      max-width: 360px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+      border-radius: 24px;
+      padding: 22px 22px 18px;
+      backdrop-filter: blur(8px);
+    }
+
+    .side-label {
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .side-title {
+      color: white;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -.03em;
+      text-transform: uppercase;
+      margin: 0 0 12px;
+    }
+
+    .side-copy {
+      color: rgba(255,255,255,.78);
+      font-size: 15px;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .shell {
+      position: relative;
+      margin-top: -92px;
+      padding: 0 24px 80px;
+    }
+
+    .shell-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .app-card {
+      background: #f7f3ec;
+      border: 1px solid rgba(12,11,16,.08);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .app-top {
+      padding: 28px 34px 22px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.2));
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 20px;
+      margin-bottom: 14px;
+    }
+
+    .step-label {
+      color: var(--purple);
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    .step-name {
+      color: rgba(12,11,16,.6);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(109,53,214,.16);
+      overflow: hidden;
+    }
+
+    .progress-bar span {
+      display: block;
+      width: 16.6%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), #8a61dd);
+      border-radius: 999px;
+    }
+
+    .app-body {
+      padding: 34px;
+    }
+
+    .section-title {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: .98;
+      text-transform: uppercase;
+      margin: 0 0 8px;
+      color: var(--ink);
+      max-width: 520px;
+    }
+
+    .section-copy {
+      font-size: 18px;
+      color: rgba(12,11,16,.7);
+      line-height: 1.5;
+      margin: 0 0 28px;
+      max-width: 760px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 22px 24px;
+    }
+
+    .field { grid-column: span 12; }
+    .field.half { grid-column: span 6; }
+
+    .label {
+      display: block;
+      color: var(--ink);
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -.01em;
+    }
+
+    .optional { color: rgba(12,11,16,.52); font-weight: 500; font-size: 16px; margin-left: 8px; }
+
+    .input, .textarea {
+      width: 100%;
+      border: 1.5px solid rgba(12,11,16,.16);
+      background: #fffdfa;
+      color: var(--ink);
+      border-radius: 16px;
+      padding: 18px 18px;
+      font-size: 18px;
+      box-shadow: inset 0 1px 2px rgba(12,11,16,.04);
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    .input:focus, .textarea:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 4px rgba(109,53,214,.14);
+    }
+
+    .textarea { min-height: 154px; resize: vertical; }
+
+    .choices {
+      display: grid;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .choice {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: #fffdfa;
+      border: 1.5px solid rgba(12,11,16,.14);
+      border-radius: 16px;
+      padding: 16px 18px;
+      transition: all .2s ease;
+    }
+
+    .choice:hover { border-color: rgba(109,53,214,.44); transform: translateY(-1px); }
+    .choice.active {
+      border-color: var(--purple);
+      background: rgba(109,53,214,.05);
+      box-shadow: 0 0 0 3px rgba(109,53,214,.08);
+    }
+
+    .dot {
+      width: 20px; height: 20px; border-radius: 50%; flex: 0 0 20px;
+      border: 2px solid rgba(12,11,16,.34);
+      margin-top: 1px; position: relative; background: white;
+    }
+
+    .choice.active .dot { border-color: var(--purple); }
+    .choice.active .dot::after {
+      content: ""; position: absolute; inset: 4px; background: var(--purple); border-radius: 50%; }
+
+    .choice-text {
+      font-size: 18px;
+      line-height: 1.45;
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .app-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      border-top: 1px solid var(--line);
+      padding-top: 28px;
+      margin-top: 34px;
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 56px;
+      padding: 0 22px;
+      border-radius: 16px;
+      color: rgba(12,11,16,.74);
+      border: 1.5px solid rgba(12,11,16,.12);
+      background: transparent;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .next {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      padding: 0 30px;
+      border-radius: 16px;
+      border: 0;
+      background: linear-gradient(180deg, #7a3fea 0%, var(--purple-dark) 100%);
+      color: white;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -.01em;
+      box-shadow: 0 12px 24px rgba(79,36,170,.24);
+    }
+
+    .helper {
+      font-size: 15px;
+      color: rgba(12,11,16,.58);
+      line-height: 1.5;
+      max-width: 540px;
+    }
+
+    @media (max-width: 920px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 28px; }
+      .hero-side { justify-self: start; max-width: 100%; }
+      .section-title { font-size: 28px; }
+    }
+
+    @media (max-width: 720px) {
+      .hero { padding: 22px 20px 120px; }
+      .shell { padding: 0 14px 56px; margin-top: -72px; }
+      .app-top, .app-body { padding: 22px 18px; }
+      .field.half { grid-column: span 12; }
+      h1 { font-size: 50px; }
+      .hero-copy { font-size: 19px; }
+      .progress-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .app-footer { flex-direction: column-reverse; align-items: stretch; }
+      .back, .next { width: 100%; }
+      .label, .choice-text, .input, .textarea { font-size: 17px; }
+      .step-name { font-size: 17px; }
+    }
+  
+    .panel{display:none}.panel.active{display:block}.choice{cursor:pointer}.choice input{position:absolute;opacity:0;width:1px;height:1px}.choice:focus-within{outline:3px solid #8a61dd;outline-offset:2px}.field-error{color:#ad2443;font-weight:700;font-size:14px;margin:8px 0 0}.input[aria-invalid="true"],.textarea[aria-invalid="true"]{border-color:#ad2443}.back{cursor:pointer}.next{cursor:pointer}.next:hover{filter:brightness(1.1)}.next:disabled{opacity:.5;cursor:not-allowed}.review-row{padding:14px 0;border-bottom:1px solid var(--line)}.review-row b{display:block;font-size:15px;color:var(--purple-dark);margin-bottom:4px}.review-row span{font-size:18px}.testing{background:#f1b62d;color:#1d1711;padding:12px 24px;text-align:center;font-weight:800;font-size:14px}.checkline{display:flex;gap:12px;align-items:flex-start;font-size:17px}.checkline input{width:20px;height:20px;margin-top:2px;accent-color:var(--purple)}.option-question{font-weight:900;font-size:25px;line-height:1.2;letter-spacing:-.02em;margin:0 0 18px}.question-block{margin-bottom:35px}.success-box{background:white;border-left:5px solid var(--purple);padding:24px;border-radius:12px}.error-summary{color:#ad2443;font-weight:700;margin-top:16px}.field label{cursor:default}button:focus-visible{outline:3px solid #f1b62d;outline-offset:3px}
+  </style>
+</head><body><div class="testing">INTERACTIVE DESIGN TEST · No application data is saved or sent · No booking is made</div>
+<div class="page"><section class="hero"><div class="hero-inner"><div class="brand">SPEAKER REALM</div><div class="hero-grid"><div><div class="eyebrow">PRIVATE APPLICATION</div><h1><span class="white">LET'S GET YOU ON</span> <span class="gold">MORE STAGES</span></h1><p class="hero-copy">Tell us a little about your expertise, your speaking goals and where you want to go</p></div><aside class="hero-side"><div class="side-label">WHAT HAPPENS NEXT</div><h2 class="side-title">APPLY, THEN BOOK YOUR CALL</h2><p class="side-copy">After the application, you'll continue to scheduling so you can reserve a Speaker Realm consultation</p></aside></div></div></section>
+<div class="shell"><div class="shell-inner"><section class="app-card"><div class="app-top"><div class="progress-row"><div class="step-label" id="stepIndicator">STEP 1 OF 6</div><div class="step-name" id="stepName">Your details</div></div><div class="progress-bar"><span id="progressFill"></span></div></div>
+<div class="app-body"><form id="application" novalidate>
+<div class="panel active" data-step="0"><h2 class="section-title">FIRST, THE ESSENTIALS</h2><p class="section-copy">How can we reach you when it's time to talk?</p><div class="grid">
+<div class="field"><label for="full_name" class="label">Full name</label><input class="input" id="full_name" name="full_name" autocomplete="name" required placeholder="Your name"></div>
+<div class="field half"><label for="email" class="label">Email</label><input class="input" id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+<div class="field half"><label for="phone" class="label">Phone</label><input class="input" id="phone" name="phone" type="tel" autocomplete="tel" required placeholder="Your best number"></div>
+<div class="field"><label for="website" class="label">Website or LinkedIn <span class="optional">Optional</span></label><input class="input" id="website" name="website" type="text" placeholder="https://"></div></div></div>
+<div class="panel" data-step="1"><h2 class="section-title">YOUR SPEAKING</h2><p class="section-copy">Where you are today and what you bring to the stage</p><div class="question-block" data-question="career"><h3 class="option-question">1. Where are you in your speaking career?</h3><div class="choices" id="career"></div></div><div class="field"><label for="topics" class="label">2. What do you speak about?</label><textarea class="textarea" id="topics" name="topics" required placeholder="Your areas of expertise, topics or signature message"></textarea></div></div>
+<div class="panel" data-step="2"><h2 class="section-title">WHAT SUCCESS LOOKS LIKE</h2><p class="section-copy">Tell us where you'd most like speaking to take you</p><div class="question-block" data-question="goal"><h3 class="option-question">3. What would make speaking a major success for you over the next 12 months?</h3><div class="choices" id="goal"></div></div><div class="question-block" data-question="offer"><h3 class="option-question">4. What do you currently sell or offer beyond speaking?</h3><div class="choices" id="offer"></div></div></div>
+<div class="panel" data-step="3"><h2 class="section-title">MORE THAN THE STAGE</h2><p class="section-copy">Let's explore the business opportunity behind your expertise</p><div class="question-block" data-question="packaging"><h3 class="option-question">5. If accepted into the Speaker Stage Pipeline, would you be open to our help packaging your expertise into higher-value programs that create additional revenue beyond speaking fees?</h3><div class="choices" id="packaging"></div></div><div class="question-block" data-question="fee"><h3 class="option-question">6. What is your current speaking fee?</h3><div class="choices" id="fee"></div></div></div>
+<div class="panel" data-step="4"><h2 class="section-title">THE SUPPORT YOU WANT</h2><p class="section-copy">Which parts of the business would you like a team to take on?</p><div class="question-block" data-question="support"><h3 class="option-question">7. Which part of growing your speaking business would you most like to take off your plate?</h3><div class="choices" id="support"></div></div><div class="question-block" data-question="investment"><h3 class="option-question">8. If we're a good fit, are you prepared to invest in professional speaker representation?</h3><div class="choices" id="investment"></div></div></div>
+<div class="panel" data-step="5"><h2 class="section-title">ONE LAST THING</h2><p class="section-copy">Then you can review everything before you finish</p><div class="question-block" data-question="timing"><h3 class="option-question">9. When would you ideally like to begin?</h3><div class="choices" id="timing"></div></div><div class="field"><label for="notes" class="label">Anything else you'd like us to know? <span class="optional">Optional</span></label><textarea class="textarea" id="notes" name="notes" placeholder="Anything that would help us understand your situation"></textarea></div><div class="question-block" style="margin:30px 0 0"><label class="checkline"><input type="checkbox" id="consent" name="consent"><span>I agree that Speaker Realm may store my application and contact me about my interest in representation</span></label></div></div>
+<div class="panel" data-step="6"><h2 class="section-title">REVIEW YOUR APPLICATION</h2><p class="section-copy">Take a moment to check your answers, then finish this test</p><div id="reviewRows"></div></div>
+<div class="panel" data-step="7"><div class="success-box"><div class="eyebrow" style="color:var(--purple)">APPLICATION TEST COMPLETE</div><h2 class="section-title" style="margin-bottom:20px">YOU'RE READY FOR THE NEXT STEP</h2><p class="section-copy">In the live version, your answers will be securely saved and you'll continue to your Calendly booking page</p><p style="font-weight:800;font-size:19px">Calendly destination: <a href="https://calendly.com/mannywolfe/30min" target="_blank" rel="noopener noreferrer">calendly.com/mannywolfe/30min</a></p><p class="helper">This test has not submitted an application or booked a call</p></div></div>
+<div class="error-summary" id="errorSummary" role="alert" aria-live="polite"></div>
+<div class="app-footer"><div class="helper" id="footerHelper">Your answers stay in this browser during the test and are not sent to a server</div><div style="display:flex;gap:14px;align-items:center"><button class="back" type="button" id="backBtn" hidden>Back</button><button class="next" type="button" id="nextBtn">Continue →</button></div></div>
+</form></div></section></div></div></div>
+<script>
+(() => {
+ const titles=['Your details','Your speaking','Your goals','Your offers','Your support','Final step','Review your answers','Test complete'];
+ const options={
+ career:["I'm ready to begin speaking professionally","I speak occasionally and want more opportunities","I'm an established speaker looking to grow","Speaking is already a significant part of my business"],
+ goal:['Earning more from speaking fees','Attracting higher-value consulting, coaching, or training clients','Building the visibility and authority that opens bigger doors','Creating a speaking business that generates revenue in multiple ways'],
+ offer:['Consulting or coaching','Corporate training or workshops','Programs, courses, books or products','I primarily earn speaking fees',"I haven't developed an offer yet"],
+ packaging:["Absolutely, I'd love to explore that",'Possibly, depending on the opportunity','I already have established programs and offers',"I'd prefer to focus exclusively on speaking"],
+ fee:["I don't currently charge",'$1,000–$3,000','$3,000–$5,000','$5,000–$10,000','$10,000+','It varies by engagement'],
+ support:['Finding the right speaking opportunities','Pitching event organizers and following up','Building a stronger speaker brand and marketing presence','Turning speaking opportunities into ongoing business','All of the above, I want someone to handle the entire process'],
+ investment:["Yes, I'm ready to invest",'Possibly, depending on the opportunity and structure','Not at this time'],
+ timing:['As soon as possible','Within 30 days','Within 90 days',"I'm exploring for the future"]
+ };
+ const labels={full_name:'Full name',email:'Email',phone:'Phone',website:'Website or LinkedIn',career:'Speaking experience',topics:'Speaking topics',goal:'12-month success goal',offer:'Current offers',packaging:'Higher-value programs',fee:'Current speaking fee',support:'Preferred support',investment:'Investment readiness',timing:'Start timeline',notes:'Additional notes'};
+ let step=0;
+ const root=document.getElementById('application');
+ for(const [k,opts] of Object.entries(options)){
+  const host=document.getElementById(k);
+  opts.forEach((value,i)=>{
+   const el=document.createElement('label');el.className='choice';
+   const input=document.createElement('input');input.type='radio';input.name=k;input.value=value;input.required=true;
+   const dot=document.createElement('span');dot.className='dot';dot.setAttribute('aria-hidden','true');
+   const text=document.createElement('span');text.className='choice-text';text.textContent=value;
+   input.addEventListener('change',()=>{host.querySelectorAll('.choice').forEach(c=>c.classList.remove('active'));el.classList.add('active');document.getElementById('errorSummary').textContent='';});
+   el.append(input,dot,text);host.append(el);
+  });
+ }
+ const val=(k)=>{const x=root.elements.namedItem(k);if(!x)return '';if(x instanceof RadioNodeList)return x.value||'';if(x.type==='checkbox')return x.checked?'Yes':'No';return (x.value||'').trim()};
+ function clearErrors(){document.querySelectorAll('.field-error').forEach(x=>x.remove());document.querySelectorAll('[aria-invalid]').forEach(x=>x.removeAttribute('aria-invalid'));document.getElementById('errorSummary').textContent=''}
+ function invalidate(name,message){const input=root.elements.namedItem(name);let target=name in options?document.getElementById(name):input; const x=document.createElement('p');x.className='field-error';x.textContent=message;target.after(x);if(input && !(input instanceof RadioNodeList))input.setAttribute('aria-invalid','true')}
+ function validate(){clearErrors();let errors=[];const required={0:['full_name','email','phone'],1:['career','topics'],2:['goal','offer'],3:['packaging','fee'],4:['support','investment'],5:['timing','consent']}[step]||[];
+  for(const k of required){if(k==='consent'&&!document.getElementById('consent').checked){errors.push(k);invalidate(k,'Please agree before continuing');continue}if(!val(k)){errors.push(k);invalidate(k,'Please complete this field')}}
+  if(step===0){const email=val('email');if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errors.push('email');invalidate('email','Enter a valid email address')}if(val('phone')&&val('phone').replace(/\D/g,'').length<7){errors.push('phone');invalidate('phone','Enter a valid phone number')}}
+  if(errors.length){document.getElementById('errorSummary').textContent='Please complete the highlighted questions before continuing';const first=root.elements.namedItem(errors[0]);if(first && !(first instanceof RadioNodeList))first.focus();return false}return true
+ }
+ function review(){const box=document.getElementById('reviewRows');box.replaceChildren();for(const [k,label] of Object.entries(labels)){const a=val(k);if(!a)continue;const row=document.createElement('div');row.className='review-row';const b=document.createElement('b');b.textContent=label;const v=document.createElement('span');v.textContent=a;row.append(b,v);box.append(row)}}
+ function render(){clearErrors();document.querySelectorAll('.panel').forEach(el=>el.classList.toggle('active',Number(el.dataset.step)===step));const done=step===7;document.getElementById('stepIndicator').textContent=done?'TEST COMPLETED':step===6?'REVIEW YOUR ANSWERS':`STEP ${step+1} OF 6`;document.getElementById('stepName').textContent=titles[step];document.getElementById('progressFill').style.width=`${Math.min((step+1)/6,1)*100}%`;document.getElementById('backBtn').hidden=step===0||done;document.getElementById('nextBtn').textContent=step===5?'Review answers →':step===6?'Finish test →':step===7?'Start another test':'Continue →';document.getElementById('footerHelper').textContent=done?'No information was sent':step===6?'Review your responses before finishing the test':'Your answers stay in this browser during the test and are not sent to a server';window.scrollTo({top:0,behavior:'smooth'})}
+ document.getElementById('nextBtn').addEventListener('click',()=>{if(step===7){root.reset();document.querySelectorAll('.choice.active').forEach(x=>x.classList.remove('active'));step=0;render();return}if(step<6&&!validate())return;if(step===5)review();step++;render()});
+ document.getElementById('backBtn').addEventListener('click',()=>{if(step>0){step--;render()}});
+ root.addEventListener('submit',e=>e.preventDefault());render();
+})();
+</script>
+<script>
+document.addEventListener('click', function(event) {
+  const link = event.target.closest('a[href]');
+  if (!link) return;
+  const href = link.getAttribute('href');
+  const destinations = {
+    'index.html': 'landing', './index.html': 'landing',
+    'apply.html': 'apply', './apply.html': 'apply',
+    'schedule.html': 'schedule', './schedule.html': 'schedule',
+    'confirmed.html': 'confirmed', './confirmed.html': 'confirmed',
+    '/apply': 'apply', '/schedule': 'schedule', '/confirmed': 'confirmed'
+  };
+  if (destinations[href]) {
+    event.preventDefault();
+    parent.postMessage({source: 'speaker-realm-funnel', target: destinations[href]}, '*');
+  }
+});
+</script>
+</body></html>
