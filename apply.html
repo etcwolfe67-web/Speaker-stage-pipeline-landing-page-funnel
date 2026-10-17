@@ -428,22 +428,4 @@
  root.addEventListener('submit',e=>e.preventDefault());render();
 })();
 </script>
-<script>
-document.addEventListener('click', function(event) {
-  const link = event.target.closest('a[href]');
-  if (!link) return;
-  const href = link.getAttribute('href');
-  const destinations = {
-    'index.html': 'landing', './index.html': 'landing',
-    'apply.html': 'apply', './apply.html': 'apply',
-    'schedule.html': 'schedule', './schedule.html': 'schedule',
-    'confirmed.html': 'confirmed', './confirmed.html': 'confirmed',
-    '/apply': 'apply', '/schedule': 'schedule', '/confirmed': 'confirmed'
-  };
-  if (destinations[href]) {
-    event.preventDefault();
-    parent.postMessage({source: 'speaker-realm-funnel', target: destinations[href]}, '*');
-  }
-});
-</script>
 </body></html>
